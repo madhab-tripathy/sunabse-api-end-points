@@ -35,7 +35,7 @@ public class SecurityConfiguration{
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/sunbase/customer/**").authenticated()
+
                         .requestMatchers("/api/v1/sunbase/auth/**")
                         .permitAll()
                         .anyRequest()

@@ -1,33 +1,20 @@
-package com.sunbase.sunbase.user.management.entity;
+package com.sunbase.sunbase.user.management.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
-@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "_customer")
-public class Customer {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
-    @Column(name = "uuid")
-    private String uuid;
+public class CustomerResponse {
     private String firstName;
     private String lastName;
-    private String street;
     private String address;
     private String city;
     private String state;
     private String email;
     private String phone;
-
 }
