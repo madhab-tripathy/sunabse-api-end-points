@@ -3,20 +3,14 @@ package com.sunbase.sunbase.user.management.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sunbase.sunbase.user.management.dto.CustomerRequest;
 import com.sunbase.sunbase.user.management.dto.CustomerResponse;
-import com.sunbase.sunbase.user.management.dto.SyncResponse;
-import com.sunbase.sunbase.user.management.entity.Customer;
-import com.sunbase.sunbase.user.management.service.ApiSyncService;
 import com.sunbase.sunbase.user.management.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-
 /**
  * customer end-points
  */
@@ -36,12 +30,9 @@ public class CustomerController {
     ){
         return new ResponseEntity<>(customerService.addCustomer(customerRequest), HttpStatus.OK);
     }
-//     get uuid from user mail
-    @GetMapping("/get-uuid")
-    public ResponseEntity<String> getCustomerUuidByEmail(
-            @RequestParam("email") String email
-    ){
-        return new ResponseEntity<>(customerService.findCustomerUUID(email),HttpStatus.OK);
+    @GetMapping("/get-all-customers")
+    public ResponseEntity<List<CustomerResponse>> getAllCustomers(){
+        return new ResponseEntity<>(customerService.getAllCustomers(),HttpStatus.OK);
     }
 //    update customer
     @PutMapping("/edit-customer")
@@ -73,7 +64,14 @@ public class CustomerController {
     }
 //    search by search term in sorted order
     @GetMapping("/search")
-    public ResponseEntity<List<CustomerResponse>> searchResult(@RequestParam("q") String searchTerm){
-        return new ResponseEntity<>(customerService.getCustomersBySearch(searchTerm),HttpStatus.OK);
+    public ResponseEntity<List<CustomerResponse>> searchResult(
+            @RequestParam("searchOption") String searchOption, @RequestParam("q") String query
+    ){
+        return new ResponseEntity<>(customerService.getCustomersBySearch(searchOption, query),HttpStatus.OK);
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        SecurityContextHolder.clearContext(); // Clear authentication context
+        return ResponseEntity.ok().build();
     }
 }
