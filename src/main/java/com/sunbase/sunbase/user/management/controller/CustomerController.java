@@ -67,11 +67,8 @@ public class CustomerController {
     public ResponseEntity<List<CustomerResponse>> searchResult(
             @RequestParam("searchOption") String searchOption, @RequestParam("q") String query
     ){
+        System.out.println(query);
         return new ResponseEntity<>(customerService.getCustomersBySearch(searchOption, query),HttpStatus.OK);
     }
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        SecurityContextHolder.clearContext(); // Clear authentication context
-        return ResponseEntity.ok().build();
-    }
+
 }

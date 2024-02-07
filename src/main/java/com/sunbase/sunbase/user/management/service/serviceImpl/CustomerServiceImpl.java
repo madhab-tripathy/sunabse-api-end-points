@@ -10,6 +10,7 @@ import com.sunbase.sunbase.user.management.service.ApiSyncService;
 import com.sunbase.sunbase.user.management.service.CustomerService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -34,12 +35,12 @@ public class CustomerServiceImpl implements CustomerService{
         }
         customer = Customer.builder()
                 .uuid(UUID.randomUUID().toString())
-                .firstName(customerRequest.getFirstName())
-                .lastName(customerRequest.getLastName())
-                .street(customerRequest.getStreet())
-                .address(customerRequest.getAddress())
-                .state(customerRequest.getState())
-                .city(customerRequest.getCity())
+                .firstName(customerRequest.getFirstName().toLowerCase())
+                .lastName(customerRequest.getLastName().toLowerCase())
+                .street(customerRequest.getStreet().toLowerCase())
+                .address(customerRequest.getAddress().toLowerCase())
+                .state(customerRequest.getState().toLowerCase())
+                .city(customerRequest.getCity().toLowerCase())
                 .phone(customerRequest.getPhone())
                 .email(customerRequest.getEmail())
                 .build();
@@ -59,12 +60,12 @@ public class CustomerServiceImpl implements CustomerService{
 //        get existing customer
         Customer customer = getExistCustomer(uuid);
         if(customer != null){
-            customer.setFirstName(customerRequest.getFirstName());
-            customer.setLastName(customerRequest.getLastName());
-            customer.setStreet(customerRequest.getStreet());
-            customer.setAddress(customerRequest.getAddress());
-            customer.setState(customerRequest.getState());
-            customer.setCity(customerRequest.getCity());
+            customer.setFirstName(customerRequest.getFirstName().toLowerCase());
+            customer.setLastName(customerRequest.getLastName().toLowerCase());
+            customer.setStreet(customerRequest.getStreet().toLowerCase());
+            customer.setAddress(customerRequest.getAddress().toLowerCase());
+            customer.setState(customerRequest.getState().toLowerCase());
+            customer.setCity(customerRequest.getCity().toLowerCase());
             customer.setPhone(customerRequest.getPhone());
             customer.setEmail(customerRequest.getEmail());
             customerRepository.save(customer);
@@ -125,8 +126,7 @@ public class CustomerServiceImpl implements CustomerService{
         List<CustomerResponse> customerResponses = new ArrayList<>();
         updateCustomerTableWithRemoteData(syncResponses);
     //          fetch all the data from database;
-        List<Customer> customers = customerRepository.findAll();
-        sortByName(customers);
+        List<Customer> customers = customerRepository.findAllByOrderByFirstNameAscLastNameAsc();
         for (Customer c : customers){
             if (c.getUuid() != null && !c.getUuid().isEmpty()) {
                 CustomerResponse customerResponse = findCustomerById(c.getUuid());
@@ -138,9 +138,7 @@ public class CustomerServiceImpl implements CustomerService{
 
     @Override
     public List<CustomerResponse> getAllCustomers() {
-        List<Customer> customers = customerRepository.findAll();
-//        sort customer
-        sortByName(customers);
+        List<Customer> customers = customerRepository.findAllByOrderByFirstNameAscLastNameAsc();
         return findCustomerResponse(customers);
     }
 
@@ -188,13 +186,13 @@ public class CustomerServiceImpl implements CustomerService{
     private void addCustomer(Customer customer){
         customer = Customer.builder()
                 .uuid(customer.getUuid())
-                .firstName(customer.getFirstName())
-                .lastName(customer.getLastName())
-                .street(customer.getStreet())
-                .address(customer.getAddress())
-                .state(customer.getState())
-                .city(customer.getCity())
-                .phone(customer.getPhone())
+                .firstName(customer.getFirstName().toLowerCase())
+                .lastName(customer.getLastName().toLowerCase())
+                .street(customer.getStreet().toLowerCase())
+                .address(customer.getAddress().toLowerCase())
+                .state(customer.getState().toLowerCase())
+                .city(customer.getCity().toLowerCase())
+                .phone(customer.getPhone().toLowerCase())
                 .email(customer.getEmail())
                 .build();
 //        save customer in customer table
@@ -220,45 +218,34 @@ public class CustomerServiceImpl implements CustomerService{
     }
 //    search by search option and search query
     public List<CustomerResponse> getCustomersBySearch(String searchOption, String query){
-        List<Customer> customers = null;
-        List<CustomerResponse> customerResponses = null;
-        if(searchOption.equals("First Name")){
+        List<Customer> customers = customerRepository.findAllByOrderByFirstNameAscLastNameAsc();
+        List<CustomerResponse> customerResponses;
+//    Simple searching functionality by the user query
+        switch (searchOption){
 //            search by first name
-            customers = customerRepository.findByFirstName(query).stream().toList();
-            sortByName(customers);
-            customerResponses = findCustomerResponse(customers);
-
-        } else if (searchOption.equals("Email")) {
-//            search by email
-            customers = customerRepository.findByEmail(query).stream().toList();
-            sortByName(customers);
-            customerResponses = findCustomerResponse(customers);
-            
-        } else if (searchOption.equals("City")) {
-//            search by city
-            customers = customerRepository.findByCity(query).stream().toList();
-            sortByName(customers);
-            customerResponses = findCustomerResponse(customers);
-            
-        }else if(searchOption.equals("Phone")){
-//            search by phone
-            customers = customerRepository.findByPhone(query).stream().toList();
-            sortByName(customers);
-            customerResponses = findCustomerResponse(customers);
-        }else {
-            throw new RuntimeException("search term not found");
+            case "First Name":
+                customers = customerRepository.searchCustomerByName(query);
+                break;
+//             search by city
+            case "City":
+                customers = customerRepository.searchCustomerByCity(query);
+                break;
+//                search by phone
+            case "Phone":
+                customers = customerRepository.searchCustomerByPhone(query);
+                break;
+//                search by email
+            case "Email":
+                customers = customerRepository.searchCustomerByEmail(query);
+                break;
+            default:
+                break;
         }
 //        all the customer who matches with search term in sorted by first and last name
+        customerResponses = findCustomerResponse(customers);
         return customerResponses;
     }
-//    sort all customers by their first and last name
-    private void sortByName(List<Customer> customers){
 
-        try {
-            customers.sort((c1, c2) -> c1.getFirstName().toLowerCase().compareTo(c2.getFirstName().toLowerCase()));
-        }catch (Exception e){
-            throw new RuntimeException("Not found");
-        }
-    }
+
 
 }

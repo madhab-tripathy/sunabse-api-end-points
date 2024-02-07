@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Comparator;
 import java.util.UUID;
 
 @Entity
@@ -29,5 +30,11 @@ public class Customer {
     private String state;
     private String email;
     private String phone;
-
 }
+//class customeComparator implements Comparator<Customer>{
+//
+//    @Override
+//    public int compare(Customer o1, Customer o2) {
+//        return o1.getFirstName().compareToIgnoreCase(o2.getFirstName());
+//    }
+//}
